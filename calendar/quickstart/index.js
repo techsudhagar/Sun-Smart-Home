@@ -100,7 +100,8 @@ function listEvents(auth) {
         console.log(`Total mins ${event_in_minutes}`);
 
 
- if (event_in_minutes == 60 || event_in_minutes == 30  || event_in_minutes == 15 || event_in_minutes == 5 || event_in_minutes == 0) {
+ if (event_in_minutes == 59 || event_in_minutes == 29  || event_in_minutes == 14 || event_in_minutes == 4 || event_in_minutes == -1) {
+    event_in_minutes = event_in_minutes + 1;
     console.log(` ${event.summary} event starts in ${event_in_minutes} minutes` );
 
     assistant.notifyAssistant(event.summary,event_in_minutes);
