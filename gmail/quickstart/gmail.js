@@ -137,7 +137,7 @@ function listEmails(auth) {
 
           if(email_msg.includes(FRONT_MOTION)) {
 
-          console.log(` Actual Email..: ${email_msg}`);
+          //console.log(` Actual Email..: ${email_msg}`);
 
           const headers = res.data.payload.headers;
 
@@ -153,11 +153,11 @@ function listEmails(auth) {
 
                 if (header.name == 'Received'){
                   received_date = header.value;
-                  console.log(`Received Date.. ${received_date}`);
+                  //console.log(`Received Date.. ${received_date}`);
 
                   received_date = received_date.split(';');
                   received_date = received_date[1].split('-');
-                  console.log(`Date Only.. ${received_date[0]}`);
+                  //console.log(`Date Only.. ${received_date[0]}`);
 
                   var alert_date = new Date(received_date[0]);
 
@@ -166,7 +166,7 @@ function listEmails(auth) {
                   const last_alert_diff = today-alert_date;
 
                   if(last_alert_diff <= 5000) {
-                    console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
+                    //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
                     assistant.showCamera('Front Door');
 
                   } 
