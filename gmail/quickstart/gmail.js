@@ -177,7 +177,7 @@ function listEmails(auth) {
               });
           }
 
-          assistant.showCamera('Front Door');
+         // assistant.showCamera('Front Door');
 
         }
           
