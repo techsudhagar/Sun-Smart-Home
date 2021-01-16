@@ -28,6 +28,7 @@ const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 // time.
 const TOKEN_PATH = 'token.json';
 const FRONT_MOTION = 'YoLink Your Front Sensor (d88b4c010002ccf3) detected someone pass.';
+const FRONT_CAM_MOTION = 'An alarm from Front Door.';
 
 // Load client secrets from a local file.
 fs.readFile('credentials.json', (err, content) => {
@@ -134,24 +135,28 @@ function listEmails(auth) {
         }, (err, res) => {
           if (err) return console.log('The API returned an error ID: ' + err);
           const email_msg = res.data.snippet;
-
-          if(email_msg.includes(FRONT_MOTION)) {
-
-         // console.log(` Actual Email..: ${email_msg}`);
-
-          const headers = res.data.payload.headers;
-
           var received_date;
-          const today = new Date();
+          var alert_date;
+          var last_alert_diff;
 
+          //console.log(` Actual Email..: ${email.id}:..:${email_msg}`);
 
-          if(headers.length) {
+         // if (email_msg.includes(FRONT_MOTION)) {
+           if(false) {
+
+            //console.log(` Actual Email..: ${email_msg}`);
+
+            const headers = res.data.payload.headers;
+
+            const today = new Date();
+
+            if (headers.length) {
 
               headers.forEach((header) => {
 
                 //console.log(header.name);
 
-                if (header.name == 'Received'){
+                if (header.name == 'Received') {
                   received_date = header.value;
                   //console.log(`Received Date.. ${received_date}`);
 
@@ -159,39 +164,75 @@ function listEmails(auth) {
                   received_date = received_date[1].split('-');
                   //console.log(`Date Only.. ${received_date[0]}`);
 
-                  var alert_date = new Date(received_date[0]);
+                  alert_date = new Date(received_date[0]);
 
                   alert_date.setHours(alert_date.getHours() + 2);
 
-                  const last_alert_diff = today-alert_date;
+                  const last_alert_diff = today - alert_date;
 
-                  if(last_alert_diff <= 5000) {
+                  if (last_alert_diff <= 5000) {
                     //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
                     assistant.showCamera('Front Door');
 
-                  } 
-              
+                  }
+
                 }
-               //console.log(header.value);
+                //console.log(header.value);
 
               });
+            }
+
+            // assistant.showCamera('Front Door');
+
+          } else {
+            const headers = res.data.payload.headers;
+            const today = new Date();
+
+            if (headers.length) {
+
+              headers.forEach((header) => {
+
+                if (header.name == 'Subject') {
+
+                 // console.log(`header.name ${header.value}`);
+
+                  if (header.value == FRONT_CAM_MOTION) {
+
+                    received_date = email_msg.split(' ');
+
+                    received_date = received_date[1] + ' ' + received_date[2];
+
+                    //console.log(`Front Door Receive Date..: ${received_date}`);
+
+                    alert_date = new Date(received_date);
+
+                    last_alert_diff = today - alert_date;
+
+                    console.log(`Time diff ${last_alert_diff}`);
+  
+                    if (last_alert_diff <= 5000) {
+                      //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
+                      assistant.showCamera('Front Door');
+  
+                   }
+
+
+                  }
+
+                }
+
+              });
+
+            }
           }
 
-         // assistant.showCamera('Front Door');
-
-        }
-          
-        }
-
-
-        );
+        });
 
       });
     } else {
       console.log('No email found.');
     }
   });
-
 
 
 }
