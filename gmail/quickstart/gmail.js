@@ -208,10 +208,10 @@ function listEmails(auth) {
 
                     last_alert_diff = today - alert_date;
 
-                    console.log(`Time diff ${today}:..:${alert_date}:..: ${last_alert_diff}`);
+                   // console.log(`Time diff ${today}:..:${alert_date}:..: ${last_alert_diff}`);
   
                     if (last_alert_diff <= 50000) {
-                      console.log('Assistant Called');
+                      //console.log('Assistant Called');
                       assistant.showCamera('Front Door');
   
                    }
