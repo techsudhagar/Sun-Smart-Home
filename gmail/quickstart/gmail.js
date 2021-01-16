@@ -137,7 +137,7 @@ function listEmails(auth) {
 
           if(email_msg.includes(FRONT_MOTION)) {
 
-          console.log(` Actual Email..: ${email_msg}`);
+         // console.log(` Actual Email..: ${email_msg}`);
 
           const headers = res.data.payload.headers;
 
