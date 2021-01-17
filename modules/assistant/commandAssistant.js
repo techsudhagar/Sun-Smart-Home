@@ -16,6 +16,20 @@ function showCamera(which_camera) {
 
 }
 
+function turnLightState(state) {
+	console.log(` Turning light state to ${state}.`);
+
+	const command  = `{
+		"command": "Turn ${state} tube light",
+		"converse": true,
+		"user": "techsudhagar@gmail.com" 
+		}`;
+
+
+	commandAssistant(command);
+
+}
+
 
 function notifyAssistant(event_title,diff_mins){
 	console.log(`Event Title..:${event_title},..:${diff_mins}:`);
@@ -73,4 +87,4 @@ function notifyAssistant(event_title,diff_mins){
 	  
 	  }
 
-    module.exports = { notifyAssistant, showCamera};
+    module.exports = { notifyAssistant, showCamera,turnLightState};

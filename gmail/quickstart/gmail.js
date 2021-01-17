@@ -29,6 +29,8 @@ const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 const TOKEN_PATH = 'token.json';
 const FRONT_MOTION = 'YoLink Your Front Sensor (d88b4c010002ccf3) detected someone pass.';
 const FRONT_CAM_MOTION = 'An alarm from Front Door.';
+const KIDS_LIGHT_SENSOR = 'Device Alarm : Kids Light Sensor';
+const SENSOR_MOTION_TEXT = 'detected someone pass';
 
 // Load client secrets from a local file.
 fs.readFile('credentials.json', (err, content) => {
@@ -36,6 +38,9 @@ fs.readFile('credentials.json', (err, content) => {
   // Authorize a client with credentials, then call the Gmail API.
   //authorize(JSON.parse(content), listLabels);
   authorize(JSON.parse(content), listEmails);
+  //authorize(JSON.parse(content), watchInbox);
+
+
 });
 
 /**
@@ -110,6 +115,23 @@ function listLabels(auth) {
     }
   });
 }
+/*
+function watchInbox(auth) {
+const gmail = google.gmail({ version: 'v1', auth });
+const respose = gmail.users.watch({
+  userId: 'techsudhagar@gmail.com',
+  requestBody: {
+    // Replace with `projects/${PROJECT_ID}/topics/${TOPIC_NAME}`
+    //topicName: 'projects/sun-smart-home-301512/topics/SensorNotification'
+    topicName: 'projects/sun-smart-home-301512/topics/SensorNotification',
+  },
+});
+
+console.log(` Gmail Watch Status..: ${respose.data}`);
+
+}
+
+*/
 
 function listEmails(auth) {
 
@@ -120,11 +142,13 @@ function listEmails(auth) {
 
   gmail.users.messages.list({
     userId: 'me',
+    maxResults: 10,
+    q: 'deals2sun@gmail.com || from:no-reply@yosmart.com'
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const emails = res.data.messages;
     if (emails.length) {
-      console.log('Emails:');
+      //console.log('Emails:');
       emails.forEach((email) => {
         //console.log(`- ${email.id}`);
         gmail.users.messages.get({
@@ -139,7 +163,7 @@ function listEmails(auth) {
           var alert_date;
           var last_alert_diff;
 
-          //console.log(` Actual Email..: ${email.id}:..:${email_msg}`);
+          console.log(` Actual Email..: ${email.id}:..:${email_msg}`);
 
          // if (email_msg.includes(FRONT_MOTION)) {
            if(false) {
@@ -190,6 +214,8 @@ function listEmails(auth) {
 
             if (headers.length) {
 
+
+              var is_motion_header = false;
               headers.forEach((header) => {
 
                 if (header.name == 'Subject') {
@@ -217,6 +243,30 @@ function listEmails(auth) {
                    }
 
 
+                  } else if(header.value.includes(KIDS_LIGHT_SENSOR)) {
+
+                    if (email_msg.includes(SENSOR_MOTION_TEXT)) {
+
+
+                      isNewNotification
+
+                    } 
+
+                  }
+
+                  if(is_motion_header) {
+                    if(header.name == 'Received'){
+
+                     const is_motion_detected =  isNewNotification(header.value);
+
+                     if(is_motion_detected) {
+
+                      assistant.turnLightState('On');
+                      //assistant.showCamera('Front Door');
+
+                     }
+                    }
+
                   }
 
                 }
@@ -237,6 +287,34 @@ function listEmails(auth) {
 
 }
 
+
+function isNewNotification(received_date){
+
+          const today = new Date();
+
+                  received_date = received_date.split(';');
+                  received_date = received_date[1].split('-');
+                  //console.log(`Date Only.. ${received_date[0]}`);
+
+                  const alert_date = new Date(received_date[0]);
+
+                  alert_date.setHours(alert_date.getHours() + 2);
+
+                  const last_alert_diff = today - alert_date;
+
+                  console.log(` Time diif.. ${last_alert_diff}`);
+
+                  if (last_alert_diff <= 5000) {
+                    //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
+                    //assistant.showCamera('Front Door');
+
+                    return true;
+
+                  }
+
+                  return false;
+
+}
 //setInterval(listEmails, 5000);
 // [END gmail_quickstart]
 
