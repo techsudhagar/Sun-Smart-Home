@@ -142,7 +142,7 @@ function listEmails(auth) {
 
   gmail.users.messages.list({
     userId: 'me',
-    maxResults: 10,
+    maxResults: 3,
     q: 'deals2sun@gmail.com || from:no-reply@yosmart.com'
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
