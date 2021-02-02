@@ -31,6 +31,8 @@ const FRONT_MOTION = 'YoLink Your Front Sensor (d88b4c010002ccf3) detected someo
 const FRONT_CAM_MOTION = 'An alarm from Front Door.';
 const KIDS_LIGHT_SENSOR = 'Device Alarm : Kids Light Sensor';
 const SENSOR_MOTION_TEXT = 'detected someone pass';
+const FRONT_CAM_BODY = 'Time:';
+
 
 // Load client secrets from a local file.
 fs.readFile('credentials.json', (err, content) => {
@@ -145,7 +147,7 @@ function listEmails(auth) {
     maxResults: 3,
     q: 'deals2sun@gmail.com || from:no-reply@yosmart.com'
   }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
+    if (err) return console.log('The API returned an error: List: ' + err);
     const emails = res.data.messages;
     if (emails.length) {
       //console.log('Emails:');
@@ -157,124 +159,82 @@ function listEmails(auth) {
 
 
         }, (err, res) => {
-          if (err) return console.log('The API returned an error ID: ' + err);
+          if (err) return console.log('The API returned an error Get: ' + err);
           const email_msg = res.data.snippet;
           var received_date;
           var alert_date;
           var last_alert_diff;
 
+
           console.log(` Actual Email..: ${email.id}:..:${email_msg}`);
 
-         // if (email_msg.includes(FRONT_MOTION)) {
-           if(false) {
 
-            //console.log(` Actual Email..: ${email_msg}`);
+          const headers = res.data.payload.headers;
+          const today = new Date();
 
-            const headers = res.data.payload.headers;
+          if (headers.length) {
 
-            const today = new Date();
+            var is_motion_detected = false;
 
-            if (headers.length) {
+            var kids_light_sensor = false;
+            headers.forEach((header) => {
 
-              headers.forEach((header) => {
+              if (header.name == 'Subject') {
 
-                //console.log(header.name);
+                // console.log(`header.name ${header.value}`);
 
-                if (header.name == 'Received') {
-                  received_date = header.value;
-                  //console.log(`Received Date.. ${received_date}`);
+                if (header.value == FRONT_CAM_MOTION) {
 
-                  received_date = received_date.split(';');
-                  received_date = received_date[1].split('-');
-                  //console.log(`Date Only.. ${received_date[0]}`);
+                  received_date = email_msg.split(' ');
 
-                  alert_date = new Date(received_date[0]);
+                  received_date = received_date[1] + ' ' + received_date[2];
 
-                  alert_date.setHours(alert_date.getHours() + 2);
+                  //console.log(`Front Door Receive Date..: ${received_date}`);
 
-                  const last_alert_diff = today - alert_date;
+                  alert_date = new Date(received_date);
 
-                  if (last_alert_diff <= 5000) {
-                    //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
+                  last_alert_diff = today - alert_date;
+
+                  // console.log(`Time diff ${today}:..:${alert_date}:..: ${last_alert_diff}`);
+
+                  if (last_alert_diff <= 50000) {
+                    //console.log('Assistant Called');
                     assistant.showCamera('Front Door');
 
                   }
 
-                }
-                //console.log(header.value);
 
-              });
-            }
+                } else if (header.value.includes(KIDS_LIGHT_SENSOR)) {
 
-            // assistant.showCamera('Front Door');
-
-          } else {
-            const headers = res.data.payload.headers;
-            const today = new Date();
-
-            if (headers.length) {
+                  if (email_msg.includes(SENSOR_MOTION_TEXT)) {
 
 
-              var is_motion_header = false;
-              headers.forEach((header) => {
-
-                if (header.name == 'Subject') {
-
-                 // console.log(`header.name ${header.value}`);
-
-                  if (header.value == FRONT_CAM_MOTION) {
-
-                    received_date = email_msg.split(' ');
-
-                    received_date = received_date[1] + ' ' + received_date[2];
-
-                    //console.log(`Front Door Receive Date..: ${received_date}`);
-
-                    alert_date = new Date(received_date);
-
-                    last_alert_diff = today - alert_date;
-
-                   // console.log(`Time diff ${today}:..:${alert_date}:..: ${last_alert_diff}`);
-  
-                    if (last_alert_diff <= 50000) {
-                      //console.log('Assistant Called');
-                      assistant.showCamera('Front Door');
-  
-                   }
-
-
-                  } else if(header.value.includes(KIDS_LIGHT_SENSOR)) {
-
-                    if (email_msg.includes(SENSOR_MOTION_TEXT)) {
-
-
-                      isNewNotification
-
-                    } 
-
-                  }
-
-                  if(is_motion_header) {
-                    if(header.name == 'Received'){
-
-                     const is_motion_detected =  isNewNotification(header.value);
-
-                     if(is_motion_detected) {
-
-                      assistant.turnLightState('On');
-                      //assistant.showCamera('Front Door');
-
-                     }
-                    }
+                    kids_light_sensor = true;
 
                   }
 
                 }
 
-              });
 
+
+              } else if (header.name == 'X-Received') {
+                is_motion_detected = newNotificationByReceivedDate(header.value);
+
+              }
+
+            });
+
+            if (is_motion_detected && kids_light_sensor) {
+
+              assistant.changeLightState('Tube Light', 'On');
             }
+
+            is_motion_detected = false;
+
+            kids_light_sensor = false;
+
           }
+
 
         });
 
@@ -287,32 +247,60 @@ function listEmails(auth) {
 
 }
 
+function isFrontCamNewNotification(received_date) {
 
-function isNewNotification(received_date){
 
-          const today = new Date();
+  received_date = received_date.substring(6, received_date.length);
 
-                  received_date = received_date.split(';');
-                  received_date = received_date[1].split('-');
-                  //console.log(`Date Only.. ${received_date[0]}`);
+  console.log(`After Time trim..:${received_date}`);
+  const today = new Date();
 
-                  const alert_date = new Date(received_date[0]);
+  const alert_date = new Date(received_date);
 
-                  alert_date.setHours(alert_date.getHours() + 2);
+  //alert_date.setHours(alert_date.getHours() + 2);
 
-                  const last_alert_diff = today - alert_date;
+  const last_alert_diff = today - alert_date;
 
-                  console.log(` Time diif.. ${last_alert_diff}`);
+  console.log(` From Cam Time  ${last_alert_diff} :..: ${alert_date}`);
 
-                  if (last_alert_diff <= 5000) {
-                    //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
-                    //assistant.showCamera('Front Door');
+  if (last_alert_diff <= 5000) {
+    //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
+    assistant.showCamera('Front Door');
 
-                    return true;
+    return true;
 
-                  }
+  }
 
-                  return false;
+  return false;
+
+
+}
+
+function newNotificationByReceivedDate(received_date) {
+
+  const today = new Date();
+
+  received_date = received_date.split(';');
+  received_date = received_date[1].split('-');
+  //console.log(`Date Only.. ${received_date[0]}`);
+
+  const alert_date = new Date(received_date[0]);
+
+  alert_date.setHours(alert_date.getHours() + 2);
+
+  const last_alert_diff = today - alert_date;
+
+  console.log(` Time diif.. ${last_alert_diff}`);
+
+  if (last_alert_diff <= 50000) {
+    //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
+    //assistant.showCamera('Front Door');
+
+    return true;
+
+  }
+
+  return false;
 
 }
 //setInterval(listEmails, 5000);

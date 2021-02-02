@@ -7,7 +7,7 @@ function showCamera(which_camera) {
 
 	const command  = `{
 		"command": " Show ${which_camera} camera on Hub",
-		"converse": true,
+		"converse": false,
 		"user": "techsudhagar@gmail.com" 
 		}`;
 
@@ -21,7 +21,21 @@ function turnLightState(state) {
 
 	const command  = `{
 		"command": "Turn ${state} tube light",
-		"converse": true,
+		"converse": false,
+		"user": "techsudhagar@gmail.com" 
+		}`;
+
+
+	commandAssistant(command);
+
+}
+
+function changeLightState(device_name,state) {
+	console.log(` Turning ${device_name} to ${state}.`);
+
+	const command  = `{
+		"command": "Turn ${state} ${device_name}",
+		"converse": false,
 		"user": "techsudhagar@gmail.com" 
 		}`;
 
@@ -87,4 +101,4 @@ function notifyAssistant(event_title,diff_mins){
 	  
 	  }
 
-    module.exports = { notifyAssistant, showCamera,turnLightState};
+    module.exports = { notifyAssistant, showCamera,turnLightState,changeLightState};
