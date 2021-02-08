@@ -261,7 +261,7 @@ function newNotificationByReceivedDate(received_date) {
 
   console.log(` Time diif.. ${last_alert_diff}`);
 
-  if (last_alert_diff <= 10000) {
+  if (last_alert_diff <= 5000) {
     //console.log(`Date Object.. ${alert_date}:..: ${today-alert_date}`);
     //assistant.showCamera('Front Door');
 
