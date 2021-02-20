@@ -17,7 +17,7 @@ function notifyAssistant(event_title,diff_mins){
 		return `{
 		  "command": " You have ${event_title} event starting in ${in_mins} minutes",
 		  "broadcast": true,
-		  "user": "techsudhagar@gmail.com" 
+		  "user": "nagarajan.sudhagar@gmail.com" 
 		  }`;
 	  
 	  
